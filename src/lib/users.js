@@ -4,62 +4,53 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 
-let SECRET = 'lovleysecret';
+// let SECRET = 'lovleysecret';
 
-let db = {};
-let users = {};
+// let db = {};
+// let users = {};
+const users = new mongoose.Schema({
+  username: {type: String, required: true, unique: true},
+  password: {type: String, required: true},
+});
 
-// const usersSchema = mongoose.Schema({
-//   username: {type: String, required: true, unique: true},
-//   password: {type: String, required: true},
-// });
-// class Users {
-//   constructor(schema){
-//     this.schema = schema;
-//   }
-
-//   create (record) {
-
-//     if (!this.schema[record.username]) {
-//       record.password = bcrypt.hash(record.password, 5);
-//       this.schema[record.username] = record;
-//       this.schema[record.username].save();
-//       return record;
-//     }else{console.error();}
-
-//   }
-  users.save = async function(record) {
-
-    if (!db[record.username]) {
-      record.password = await bcrypt.hash(record.password, 5);
-
-      db[record.username] = record;
-      return record;
-    }
-
-    return Promise.reject();
+users.pre('save', async function(){
+  if (!users.username) {
+  this.password = await bcrypt.hash(this.password, 10);
+  };
+});
+users.methods.authenticateBasic = async function(auth) {
+  return this.findOne({username:auth.user})
+    .then((user)=>{
+      return bcrypt.compare(auth.pass, user.password)
+    .then(valid => valid ? this : null);
+    });
   }
-
-//   authenticateBasic(user, pass){
-//     let valid = bcrypt.compare(pass, this.schema[user].password);
-//     return valid ? this.schema[user] : console.error();
-//   }
-  users.authenticateBasic = async function(user,pass) {
-    let valid = await bcrypt.compare(pass, db[user].password);
-    return valid ? db[user] : Promise.reject();
-  }
-//   generateToken(user){
-//     let token = jwt.sign({ username: user.username}, SECRET);
-//     return token;
-//   }
-
-//   list(){
-//     return this.schema;
-//   }
-  users.generateToken = function(user) {
-    let token = jwt.sign({ username: user.username}, SECRET);
+users.methods.generateToken = function(user) {
+    let token = jwt.sign({ username: user.username}, process.env.SECRET);
     return token;
   }
 
-users.list = () => db;
-module.exports =  users;
+  // users.save = async function(record) {
+  // if (!db[record.username]) {
+  //     record.password = await bcrypt.hash(record.password, 5);
+
+  //     db[record.username] = record;
+  //     record.save()
+  //     return record;
+  //   }
+
+  //   return Promise.reject();
+  // }
+
+  // users.authenticateBasic = async function(user,pass) {
+  //   let valid = await bcrypt.compare(pass, db[user].password);
+  //   return valid ? db[user] : Promise.reject();
+  // }
+
+  // users.generateToken = function(user) {
+  //   let token = jwt.sign({ username: user.username}, SECRET);
+  //   return token;
+  // }
+
+users.methods.list = () => users;
+module.exports = mongoose.model('users',users);

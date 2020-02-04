@@ -7,17 +7,35 @@ const base64 = require('base-64');
 describe('Authentication Model',()=>{
   it('POST to /signup to create a new user', ()=>{
     let test = {'username': 'qusai', 'password': '123'};
-    mockRequest.post('/signup')
+    return  mockRequest.post('/signup')
       .send(test)
       .then(data=>{
-          console.log(data.text)
-        expect(data.text).toEqual(base64.encode(test.password));
+        // console.log(data);
+        expect(data.status).toEqual(200);
       });
   });
-  it('POST to /signin to get the user', ()=>{
-
-  });
+  // it('POST to /signin to get the user', ()=>{
+  //   let test = {'username': 'qusai', 'password': '123'};
+  //   return mockRequest.post('/signin')
+  //     .send(test)
+  //     .then(data=>{
+  //       console.log(data);
+  //       expect(data.status).toEqual(200);
+  //       expect(typeof data.token).toEqual('string');
+  //     });
+  // });
   it('GET to /users to get all users', ()=>{
-
+    let test = {'username': 'qusai', 'password': '123'};
+    return mockRequest.post('/signup')
+      .send(test)
+      .then(data=>{
+        console.log(data.body);
+        return mockRequest.get('/users')
+          .then(result =>{
+            console.log(result);
+            // expect(result.status).toEqual(200);
+            // expect(result.body).toEqual('string');
+          });
+      });
   });
 });
