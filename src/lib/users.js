@@ -1,4 +1,5 @@
-
+/* eslint-disable strict */
+'use strict';
 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -18,13 +19,24 @@ users.pre('save', async function(){
   this.password = await bcrypt.hash(this.password, 10);
   };
 });
-users.methods.authenticateBasic = async function(auth) {
-  return this.findOne({username:auth.user})
-    .then((user)=>{
-      return bcrypt.compare(auth.pass, user.password)
-    .then(valid => valid ? user : null);
-    });
-  }
+// users.statics.authenticateBasic = async function(auth) {
+//   console,log('++++++++++++++++++++',auth)
+//   return this.findOne({username:auth.user})
+//     .then(user=>{
+//       console,log(user)
+//       return bcrypt.compare(auth.pass, user.password)
+//     .then(valid => valid ? user : null);
+//     });
+//   }
+users.statics.authenticateBasic = function(auth) {
+  return this.findOne({username:auth.username})
+    .then(user => user.passCompare(auth.password))
+    .catch(console.error);
+};
+users.methods.passCompare = function(password) {
+  return bcrypt.compare(password, this.password)
+    .then(valid => valid ? this : null);
+};
 users.methods.generateToken = function(user) {
     let token = jwt.sign({ username: user.username}, process.env.SECRET);
     return token;
@@ -52,5 +64,8 @@ users.methods.generateToken = function(user) {
   //   return token;
   // }
 
-// users.methods.list = () => users;
+users.statics.list =  async function(){
+  let results = await this.find({});
+  return results;
+};
 module.exports = mongoose.model('users',users);
