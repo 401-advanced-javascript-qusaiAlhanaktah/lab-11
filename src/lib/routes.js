@@ -6,11 +6,11 @@ const Users = require('./users.js');
 const basicAuth = require('./basic-auth-middleware.js');
 
 authRouter.post('/signup', (req, res,next) => {
-  console.log( new Users);
+  // console.log( new Users);
   let user = new Users(req.body);
   user.save()
     .then(data => {
-      console.log(data);
+      // console.log(data);
       let token = user.generateToken(data);
       res.status(200).send(token);
     }).catch(next);

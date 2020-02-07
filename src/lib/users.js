@@ -22,7 +22,7 @@ users.methods.authenticateBasic = async function(auth) {
   return this.findOne({username:auth.user})
     .then((user)=>{
       return bcrypt.compare(auth.pass, user.password)
-    .then(valid => valid ? this : null);
+    .then(valid => valid ? user : null);
     });
   }
 users.methods.generateToken = function(user) {
@@ -52,5 +52,5 @@ users.methods.generateToken = function(user) {
   //   return token;
   // }
 
-users.methods.list = () => users;
+// users.methods.list = () => users;
 module.exports = mongoose.model('users',users);
