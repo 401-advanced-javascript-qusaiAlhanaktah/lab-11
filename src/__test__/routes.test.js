@@ -1,8 +1,8 @@
 
 
-const { server } = require('../server.js');
-const supergose = require('@code-fellows/supergoose');
-const mockRequest = supergose(server);
+// const { server } = require('../server.js');
+// const supergose = require('@code-fellows/supergoose');
+// const mockRequest = supergose(server);
 // const base64 = require('base-64');
 describe('Authentication Model',()=>{
   it('POST to /signup to create a new user', ()=>{
